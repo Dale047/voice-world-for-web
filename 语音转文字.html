@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>语音转文字</title>
+    <link rel="stylesheet" type="text/css" href="css/mui.min.css" />
+</head>
+<body>
+    <header class="mui-bar mui-bar-nav mui-badge-blue">
+        <a class="mui-action-back mui-icon mui-icon-back" style="color: white;"></a>
+        <h1 class="mui-title" style="color: white;">科大讯飞语音</h1>
+    </header>
+    <div class="mui-content">
+        <div style="text-align: center; padding:  10px 0;">
+            <button id="start" class="mui-btn-royal">开始录音</button>
+        </div>
+        <div class="mui-table-view">
+            <li class="mui-table-view-cell">
+                <label class="mui-tab-label">语音内容：</label>
+                <span id="talkContent"></span>
+            </li>
+        </div>
+        <p style="padding: 5px;">当前正在聆听</p>
+    </div>
+    <script src="js/mui.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        var talkContent = document.getElementById("talkContent");
+        document.addEventListener('plusready', function(){
+            document.getElementById("start").addEventListener("tap", startRecognize);
+        });
+
+        function startRecognize() {
+            if(plus.os.name=='Android'&&navigator.userAgent.indexOf('StreamApp')>0){
+                plus.nativeUI.toast('当前环境暂不支持语音识别插件');
+                return;
+            }
+            if(plus.os.name=='Android') {
+                var options = {};
+                options.engine = 'iFly';
+                options.punctuation = false;    // 是否需要标点符号 
+                talkContent.textContent = "";
+                console.log( "开始语音识别：" );
+                plus.speech.startRecognize( options, function ( s ) {
+                    console.log( s );
+                    talkContent.textContent += s;
+                }, function ( e ) {
+                    console.log( "语音识别失败："+e.message );
+                } );
+            }
+        }
+    </script>
+</body>
+</html>
