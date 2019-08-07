@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>文字转语音</title>
+		<script src="js/mui.min.js"></script>
+		<link href="css/mui.min.css" rel="stylesheet"/>
+		<!--使用本地选项卡时，将如下两行代码注释取消-->
+		<link rel="stylesheet" type="text/css" href="__wap2apptabbar.css" />
+		<script src="__wap2apptabbar.js" type="text/javascript" charset="utf-8"></script>
+		<meta name="keywords" content="考核星,考核,考试,测试,文明城市">
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<!--移动设备优先-->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!--禁用缩放-->
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<script src="js/jquery-3.1.1.min.js"></script>
+		<!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+		<link rel="stylesheet" href="bootstrap-3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+		<script src="bootstrap-3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	</head>
+	<body>
+		<div id="">
+        <textarea id="content" name="" rows="3" cols="20" style="top: 20px;height: 600px;"></textarea>
+        <input id="play" type="button" class="mui-btn mui-btn-block mui-btn-blue" style="height: 50px;" value="播放"></input>
+        <input id="puase" type="button" class="mui-btn mui-btn-block mui-btn-blue" style="height: 50px;" value="暂停"></input>
+    </div>
+     <script type="text/javascript" charset="utf-8">
+          var tokenUrl = "https://openapi.baidu.com/oauth/2.0/token";
+        var client_id = "OCwwnagwRaiMf0jv9SlCR30a";//此处为申请的client_id;
+        var client_secret = "NtR51dqBLY9C030GsUnGHyiVNDvbKkpE ";//此处为申请的client_secret ;
+        var access_token;
+        var data = "grant_type=client_credentials&client_id="+client_id+"&client_secret="+client_secret;
+        var p = document.createElement("audio");//创建一个潜在的audio播放器
+          mui("body").on("tap","#play",function(){
+              var tex = document.getElementById("content").value.replace(/[\r\n]/g,"").replace(/\ +/g,"").replace(/-/g, '').trim();//对文本进行去空格和换行；
+            var a=0,b=0,c=0;
+            var contentArray = new Array();
+            if(tex.length/500>=0){//接口上传限制字数，避免出现接口腻出，限制上传字数
+                for (var i = 0; i < tex.length/500; i++) {
+                    a = a + 500;
+                    splitTex = tex.slice(b,a);
+                    b=a;
+                    contentArray.push(splitTex);
+                }
+            }
+              mui.ajax({
+                type:"get",
+                url:tokenUrl,
+                data:data,
+                async:true,
+                success:function(resp){
+                    if(resp.access_token){
+                        access_token = resp.access_token;
+                        var shibieUrl = "http://tsn.baidu.com/text2audio";
+                        tex = encodeURI(encodeURI(contentArray[0]));
+                        var data = "tex="+tex+"&tok="+access_token+"&cuid=00:00:00:00:00:00&ctp=1&lan=zh&spd=5&pit=5&vol=5&per=0&aue=3";
+                          p.controls="controls";
+                        p.src = shibieUrl+"?"+data;
+                        p.play();
+                        c++;
+                    }else{
+                    }
+                },
+                error:function(error){
+                }
+            });
+            setTimeout(function(){
+                p.addEventListener('ended', function () {  
+                    if(contentArray.length>0&&c<=contentArray.length-1){
+                        var shibieUrl = "http://tsn.baidu.com/text2audio";
+                        tex = encodeURI(encodeURI(contentArray[c]));
+                        var data = "tex="+tex+"&tok="+access_token+"&cuid=00:00:00:00:00:00&ctp=1&lan=zh&spd=5&pit=5&vol=5&per=0&aue=3";
+                        p.src = shibieUrl+"?"+data;
+                        p.play();
+                        c++;
+                    }else{
+                        c=0;
+                    }
+                });
+            },500);
+          });
+          mui("body").on("tap","#puase",function(){
+               if(p.paused)                     {                 
+                  p.play();
+              }else{
+               p.pause();
+              }
+              
+          });
+    </script>
+	</body>
+</html>
